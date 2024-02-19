@@ -7,17 +7,27 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 
-export interface CreateTransactionParams {
-  connection: Connection;
+export type CreateTransactionParams = {
   payerAddress: string;
   instructions: TransactionInstruction[];
   signers?: Keypair[];
-}
+} & (
+  | {
+      connection: Connection;
+    }
+  | {
+      latestBlockhash: { blockhash: string; lastValidBlockHeight: number };
+    }
+);
 
 export async function createTransaction(params: CreateTransactionParams) {
-  const latestBlockhash = await params.connection.getLatestBlockhash(
-    'finalized'
-  );
+  let latestBlockhash: { blockhash: string; lastValidBlockHeight: number };
+
+  if ('latestBlockhash' in params) {
+    latestBlockhash = params.latestBlockhash;
+  } else {
+    latestBlockhash = await params.connection.getLatestBlockhash('finalized');
+  }
 
   const transactionMessage = new TransactionMessage({
     payerKey: new PublicKey(params.payerAddress),
