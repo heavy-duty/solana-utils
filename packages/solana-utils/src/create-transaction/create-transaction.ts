@@ -42,6 +42,6 @@ export async function createTransaction(params: CreateTransactionParams) {
 
   return {
     latestBlockhash,
-    transaction: new VersionedTransaction(transactionMessage),
+    transaction,
   };
 }
