@@ -5,7 +5,7 @@ import {
 import { Metaplex } from '@metaplex-foundation/js';
 import { MintLayout } from '@solana/spl-token';
 import { Connection, Keypair } from '@solana/web3.js';
-import { findNftAddresses } from '../find-nft-addresses/find-nft-addresses';
+import { findNftAddresses } from '../find-nft-addresses';
 import { createMintVerifiedNftInstructions } from './create-mint-verified-nft-instructions';
 
 export type MintVerifiedNftParams = {
