@@ -1,0 +1,23 @@
+{
+  "name": "mpl-utils",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/mpl-utils/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/mpl-utils",
+        "main": "packages/mpl-utils/src/index.ts",
+        "tsConfig": "packages/mpl-utils/tsconfig.lib.json",
+        "assets": ["packages/mpl-utils/*.md"]
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs mpl-utils {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    }
+  },
+  "tags": []
+}

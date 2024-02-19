@@ -1,0 +1,23 @@
+{
+  "name": "solana-utils",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/solana-utils/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/solana-utils",
+        "main": "packages/solana-utils/src/index.ts",
+        "tsConfig": "packages/solana-utils/tsconfig.lib.json",
+        "assets": ["packages/solana-utils/*.md"]
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs solana-utils {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    }
+  },
+  "tags": []
+}

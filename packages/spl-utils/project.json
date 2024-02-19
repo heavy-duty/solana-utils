@@ -1,0 +1,23 @@
+{
+  "name": "spl-utils",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/spl-utils/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/spl-utils",
+        "main": "packages/spl-utils/src/index.ts",
+        "tsConfig": "packages/spl-utils/tsconfig.lib.json",
+        "assets": ["packages/spl-utils/*.md"]
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs spl-utils {args.ver} {args.tag}",
+      "dependsOn": ["build"]
+    }
+  },
+  "tags": []
+}
