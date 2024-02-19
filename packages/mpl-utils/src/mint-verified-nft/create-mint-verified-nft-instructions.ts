@@ -15,7 +15,7 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { findNftAddresses } from '../find-nft-addresses/find-nft-addresses';
+import { findNftAddresses } from '../find-nft-addresses';
 
 export interface CreateMintVerifiedNftInstructionsParams {
   mintAddress: string;
@@ -51,7 +51,7 @@ export function createMintVerifiedNftInstructions(
       lamports: params.lamportsForMint,
     }),
     createInitializeMint2Instruction(
-      new PublicKey(params.mintAddress),
+      new PublicKey(nftAddresses.mintAddress),
       0,
       new PublicKey(params.payerAddress),
       new PublicKey(params.payerAddress)
@@ -60,10 +60,10 @@ export function createMintVerifiedNftInstructions(
       new PublicKey(params.payerAddress),
       new PublicKey(nftAddresses.tokenAddress),
       new PublicKey(params.receiverAddress),
-      new PublicKey(params.mintAddress)
+      new PublicKey(nftAddresses.mintAddress)
     ),
     createMintToInstruction(
-      new PublicKey(params.mintAddress),
+      new PublicKey(nftAddresses.mintAddress),
       new PublicKey(nftAddresses.tokenAddress),
       new PublicKey(params.payerAddress),
       1
@@ -71,7 +71,7 @@ export function createMintVerifiedNftInstructions(
     createCreateMetadataAccountV3Instruction(
       {
         metadata: new PublicKey(nftAddresses.metadataAddress),
-        mint: new PublicKey(params.mintAddress),
+        mint: new PublicKey(nftAddresses.mintAddress),
         mintAuthority: new PublicKey(params.payerAddress),
         payer: new PublicKey(params.payerAddress),
         updateAuthority: new PublicKey(params.payerAddress),
@@ -85,7 +85,7 @@ export function createMintVerifiedNftInstructions(
           },
           data: {
             collection: {
-              key: new PublicKey(params.collectionMintAddress),
+              key: new PublicKey(collectionAddresses.mintAddress),
               verified: false,
             },
             creators: [
@@ -106,12 +106,12 @@ export function createMintVerifiedNftInstructions(
     ),
     createCreateMasterEditionV3Instruction(
       {
-        metadata: new PublicKey(collectionAddresses.metadataAddress),
-        mint: new PublicKey(params.mintAddress),
+        metadata: new PublicKey(nftAddresses.metadataAddress),
+        mint: new PublicKey(nftAddresses.mintAddress),
         mintAuthority: new PublicKey(params.payerAddress),
         payer: new PublicKey(params.payerAddress),
         updateAuthority: new PublicKey(params.payerAddress),
-        edition: new PublicKey(collectionAddresses.masterEditionAddress),
+        edition: new PublicKey(nftAddresses.masterEditionAddress),
       },
       {
         createMasterEditionArgs: {
@@ -120,13 +120,13 @@ export function createMintVerifiedNftInstructions(
       }
     ),
     createVerifySizedCollectionItemInstruction({
-      collectionMint: new PublicKey(params.collectionMintAddress),
+      collectionMint: new PublicKey(collectionAddresses.mintAddress),
       collection: new PublicKey(collectionAddresses.metadataAddress),
       collectionAuthority: new PublicKey(params.payerAddress),
       collectionMasterEditionAccount: new PublicKey(
         collectionAddresses.masterEditionAddress
       ),
-      metadata: new PublicKey(collectionAddresses.metadataAddress),
+      metadata: new PublicKey(nftAddresses.metadataAddress),
       payer: new PublicKey(params.payerAddress),
     }),
   ];
