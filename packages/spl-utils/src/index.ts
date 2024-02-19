@@ -1,1 +1,1 @@
-export * from './lib/spl-utils';
+export * from './transfer';
