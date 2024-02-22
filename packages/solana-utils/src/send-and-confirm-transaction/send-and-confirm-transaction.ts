@@ -1,4 +1,4 @@
-import { Connection, VersionedTransaction } from '@solana/web3.js';
+import { Commitment, Connection, VersionedTransaction } from '@solana/web3.js';
 
 export interface SendAndConfirmTransaction {
   connection: Connection;
@@ -7,6 +7,7 @@ export interface SendAndConfirmTransaction {
     blockhash: string;
     lastValidBlockHeight: number;
   };
+  commitment?: Commitment;
 }
 
 export async function sendAndConfirmTransaction(
@@ -25,7 +26,7 @@ export async function sendAndConfirmTransaction(
       blockhash: params.latestBlockhash.blockhash,
       lastValidBlockHeight: params.latestBlockhash.lastValidBlockHeight,
     },
-    'finalized'
+    params.commitment ?? 'confirmed'
   );
 
   return signature;
