@@ -15,6 +15,7 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
  * @property {number} amount - The amount of tokens to transfer.
  * @property {string} [memo] - Optional memo to attach with the transfer.
  * @property {boolean} [fundReceiver] - Flag to indicate whether to fund the receiver account if it doesn't exist.
+ * @property {string} [payerAddress] - Address of the payer for the ATA rent, defaults to senderAddress.
  */
 export interface CreateTransferInstructionsParams {
   senderAddress: string;
@@ -23,6 +24,7 @@ export interface CreateTransferInstructionsParams {
   amount: number;
   memo?: string;
   fundReceiver?: boolean;
+  payerAddress?: string;
 }
 
 /**
@@ -52,7 +54,7 @@ export function createTransferInstructions(
   if (params.fundReceiver) {
     transferInstructions.push(
       createAssociatedTokenAccountIdempotentInstruction(
-        new PublicKey(params.senderAddress),
+        new PublicKey(params.payerAddress ?? params.senderAddress),
         receiverAssociatedTokenPubkey,
         new PublicKey(params.receiverAddress),
         new PublicKey(params.mintAddress)
