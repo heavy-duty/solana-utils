@@ -1,8 +1,11 @@
 {
   "name": "@heavy-duty/spl-utils",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "dependencies": {
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "@heavy-duty/solana-utils": "0.1.6",
+    "@solana/spl-token": "^0.4.0",
+    "@solana/web3.js": "^1.90.0"
   },
   "type": "commonjs",
   "main": "./src/index.js",
