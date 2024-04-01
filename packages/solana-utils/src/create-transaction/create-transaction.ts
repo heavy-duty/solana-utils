@@ -1,4 +1,5 @@
 import {
+  AddressLookupTableAccount,
   Connection,
   Keypair,
   PublicKey,
@@ -11,6 +12,7 @@ export type CreateTransactionParams = {
   payerAddress: string;
   instructions: TransactionInstruction[];
   signers?: Keypair[];
+  addressLookupTableAccounts?: AddressLookupTableAccount[] | undefined;
 } & (
   | {
       connection: Connection;
@@ -33,7 +35,7 @@ export async function createTransaction(params: CreateTransactionParams) {
     payerKey: new PublicKey(params.payerAddress),
     recentBlockhash: latestBlockhash.blockhash,
     instructions: params.instructions,
-  }).compileToV0Message();
+  }).compileToV0Message(params.addressLookupTableAccounts);
   const transaction = new VersionedTransaction(transactionMessage);
 
   if (params.signers) {
