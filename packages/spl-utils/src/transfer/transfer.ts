@@ -1,4 +1,5 @@
 import {
+  PriorityLevel,
   createTransaction,
   sendAndConfirmTransaction,
 } from '@heavy-duty/solana-utils';
@@ -13,6 +14,10 @@ export interface TransferParams {
   mintAddress: string;
   amount: number;
   decimals: number;
+  maxPriorityFee: number;
+  priorityLevel: PriorityLevel;
+  priorityFeeUrl: string;
+  retryInterval?: number;
   memo?: string;
   fundReceiver?: boolean;
   payerAddress?: string;
@@ -35,16 +40,21 @@ export async function transfer(params: TransferParams) {
     payerAddress: params.payerAddress,
     programId: params.programId,
   });
-  const { transaction, latestBlockhash } = await createTransaction({
+  const { transaction, latestBlockhash, slot } = await createTransaction({
     payerAddress: params.payerKeypair.publicKey.toBase58(),
     connection: params.connection,
     instructions,
     signers: [params.payerKeypair],
+    maxPriorityFee: params.maxPriorityFee,
+    priorityLevel: params.priorityLevel,
+    priorityFeeUrl: params.priorityFeeUrl,
   });
   const signature = await sendAndConfirmTransaction({
     connection: params.connection,
     latestBlockhash,
     transaction,
+    retryInterval: params.retryInterval ?? 5000,
+    slot,
   });
 
   return signature;

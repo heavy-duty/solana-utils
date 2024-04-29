@@ -1,4 +1,5 @@
 import {
+  PriorityLevel,
   createTransaction,
   sendAndConfirmTransaction,
 } from '@heavy-duty/solana-utils';
@@ -16,6 +17,10 @@ export type MintVerifiedNftParams = {
   symbol: string;
   receiverAddress: string;
   collectionMintAddress: string;
+  maxPriorityFee: number;
+  priorityLevel: PriorityLevel;
+  priorityFeeUrl: string;
+  retryInterval?: number;
   memo?: string;
 } & (
   | {
@@ -61,16 +66,21 @@ export async function mintVerifiedNft(params: MintVerifiedNftParams) {
     uri,
     memo: params.memo,
   });
-  const { transaction, latestBlockhash } = await createTransaction({
+  const { transaction, latestBlockhash, slot } = await createTransaction({
     payerAddress: params.payerKeypair.publicKey.toBase58(),
     connection: params.connection,
     instructions,
     signers: [params.payerKeypair, mintKeypair],
+    maxPriorityFee: params.maxPriorityFee,
+    priorityLevel: params.priorityLevel,
+    priorityFeeUrl: params.priorityFeeUrl,
   });
   const signature = await sendAndConfirmTransaction({
     connection: params.connection,
     latestBlockhash,
     transaction,
+    retryInterval: params.retryInterval ?? 5000,
+    slot,
   });
   const nftAddresses = findNftAddresses({
     ownerAddress: params.receiverAddress,

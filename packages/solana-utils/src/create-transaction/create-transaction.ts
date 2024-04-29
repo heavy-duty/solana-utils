@@ -9,8 +9,9 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from '@solana/web3.js';
+import { PriorityLevel } from '../utils';
 import { estimateComputeUnits } from './estimate-compute-units';
-import { PriorityLevel, estimatePriorityFee } from './estimate-priority-fee';
+import { estimatePriorityFee } from './estimate-priority-fee';
 
 export interface CreateTransactionParams {
   payerAddress: string;

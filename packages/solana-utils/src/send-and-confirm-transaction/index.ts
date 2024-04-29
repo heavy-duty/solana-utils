@@ -1,1 +1,1 @@
-export * from './send-and-confirm-transaction'
+export * from './send-and-confirm-transaction';
