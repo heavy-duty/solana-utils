@@ -6,14 +6,7 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from '@solana/web3.js';
-
-export type PriorityLevel =
-  | 'Min'
-  | 'Low'
-  | 'Medium'
-  | 'High'
-  | 'VeryHigh'
-  | 'UnsafeMax';
+import { PriorityLevel } from '../utils';
 
 export async function estimatePriorityFee(
   priorityFeeUrl: string,
