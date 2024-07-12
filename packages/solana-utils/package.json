@@ -1,6 +1,6 @@
 {
   "name": "@heavy-duty/solana-utils",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "dependencies": {
     "tslib": "^2.3.0",
     "@solana/web3.js": "^1.90.0",
