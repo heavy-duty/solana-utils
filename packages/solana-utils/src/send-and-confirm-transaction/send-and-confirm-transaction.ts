@@ -1,47 +1,15 @@
-import {
-  Commitment,
-  Connection,
-  SignatureResultCallback,
-  VersionedTransaction,
-} from '@solana/web3.js';
+import { Connection, VersionedTransaction } from '@solana/web3.js';
 import {
   combineLatest,
   concatMap,
   exhaustMap,
   filter,
   first,
-  forkJoin,
-  fromEventPattern,
   interval,
   lastValueFrom,
   map,
-  merge,
-  share,
   startWith,
-  takeUntil,
 } from 'rxjs';
-
-interface FromSignatureParams {
-  connection: Connection;
-  signature: string;
-  commitment: Commitment;
-}
-
-function fromSignature(params: FromSignatureParams) {
-  return fromEventPattern<{
-    result: Parameters<SignatureResultCallback>[0];
-    context: Parameters<SignatureResultCallback>[1];
-  }>(
-    (handler) =>
-      params.connection.onSignature(
-        params.signature,
-        (result, context) => handler({ result, context }),
-        params.commitment
-      ),
-    (_, subscriptionId) =>
-      params.connection.removeSignatureListener(subscriptionId)
-  );
-}
 
 interface ConfirmTransactionParams {
   latestBlockhash: {
@@ -59,7 +27,7 @@ const SLOT_BACKOFF = 100;
 const POLL_INTERVAL = 1000;
 
 function confirmTransaction(params: ConfirmTransactionParams) {
-  // this simply attempts to send the transaction.
+  // Try to send the transaction with a retry provided by the user.
   const sendTransactionWithRetry$ = interval(params.retryInterval).pipe(
     concatMap(async () => {
       const signature = await params.connection.sendEncodedTransaction(
@@ -75,6 +43,8 @@ function confirmTransaction(params: ConfirmTransactionParams) {
       return signature;
     })
   );
+
+  // Validate the blockheight with a retry provided by the user
   const blockHeightWithRetry$ = interval(params.retryInterval).pipe(
     concatMap(async () => {
       const blockHeight = await params.connection.getBlockHeight();
@@ -82,39 +52,33 @@ function confirmTransaction(params: ConfirmTransactionParams) {
       return blockHeight;
     })
   );
-  const signatureProcessed$ = merge(
-    fromSignature({
-      connection: params.connection,
-      signature: params.signature,
-      commitment: 'processed',
-    }),
-    interval(POLL_INTERVAL).pipe(
-      concatMap(() => params.connection.getSignatureStatus(params.signature)),
-      filter((signatureStatus) => signatureStatus.value !== null)
-    )
-  ).pipe(share(), first());
-  const signatureConfirmed$ = merge(
-    fromSignature({
-      connection: params.connection,
-      signature: params.signature,
-      commitment: 'confirmed',
-    }),
-    interval(POLL_INTERVAL).pipe(
-      concatMap(() => params.connection.getSignatureStatus(params.signature)),
-      filter(
-        (signatureStatus) =>
-          signatureStatus.value !== null &&
-          signatureStatus.value.confirmationStatus === 'confirmed'
-      )
-    )
-  ).pipe(first());
-  const confirmTransaction$ = forkJoin([
-    sendTransactionWithRetry$.pipe(takeUntil(signatureProcessed$)),
-    signatureProcessed$,
-  ]).pipe(
+
+  // This emits when the signatures is processed by polling every 1s.
+  const signatureProcessed$ = interval(POLL_INTERVAL).pipe(
+    concatMap(() => params.connection.getSignatureStatus(params.signature)),
+    filter((signatureStatus) => signatureStatus.value !== null),
+    first()
+  );
+
+  // This emits when the signatures is confirmed by polling every 1s.
+  const signatureConfirmed$ = interval(POLL_INTERVAL).pipe(
+    concatMap(() => params.connection.getSignatureStatus(params.signature)),
+    filter(
+      (signatureStatus) =>
+        signatureStatus.value !== null &&
+        signatureStatus.value.confirmationStatus === 'confirmed'
+    ),
+    first()
+  );
+
+  // This will start retrying until the signature is processed and confirmed.
+  const confirmTransaction$ = sendTransactionWithRetry$.pipe(
+    exhaustMap(() => signatureProcessed$.pipe(map(() => true))),
     exhaustMap(() => signatureConfirmed$.pipe(map(() => true))),
     startWith(false)
   );
+
+  // Wait for either confirmation or block heigh expiration
   const signature$ = combineLatest([
     confirmTransaction$,
     blockHeightWithRetry$,
@@ -130,6 +94,7 @@ function confirmTransaction(params: ConfirmTransactionParams) {
     first()
   );
 
+  // Turns observable into promise
   return lastValueFrom(signature$);
 }
 
