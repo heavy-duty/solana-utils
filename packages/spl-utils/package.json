@@ -1,9 +1,9 @@
 {
   "name": "@heavy-duty/spl-utils",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "dependencies": {
     "tslib": "^2.3.0",
-    "@heavy-duty/solana-utils": "0.1.8",
+    "@heavy-duty/solana-utils": "0.1.9",
     "@solana/spl-token": "^0.4.0",
     "@solana/web3.js": "^1.90.0"
   },
